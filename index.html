@@ -215,7 +215,7 @@
     const GITHUB_USER = 'yeathtit';
     const API_BASE    = 'https://api.github.com';
 
-    /* Language → colour map (subset of GitHub's palette) */
+    /* Language → color map (subset of GitHub's palette) */
     const LANG_COLORS = {
       JavaScript: '#f1e05a', TypeScript: '#3178c6', Python: '#3572A5',
       Java: '#b07219', 'C#': '#178600', 'C++': '#f34b7d', C: '#555555',
@@ -232,7 +232,11 @@
       let next = url;
       while (next) {
         const res = await fetch(next, { headers: { Accept: 'application/vnd.github+json' } });
-        if (!res.ok) throw new Error(`GitHub API error ${res.status}`);
+        if (!res.ok) {
+          if (res.status === 403) throw new Error('GitHub API rate limit exceeded. Please try again later.');
+          if (res.status === 404) throw new Error(`User "${GITHUB_USER}" not found on GitHub.`);
+          throw new Error(`GitHub API error ${res.status}`);
+        }
         const data = await res.json();
         results.push(...data);
         const link = res.headers.get('Link') || '';
@@ -323,19 +327,23 @@
         const url = `${API_BASE}/users/${GITHUB_USER}/repos?per_page=100&sort=updated`;
         allRepos = await fetchAllPages(url);
 
-        /* For fork cards we want the parent name; fetch parent info in parallel */
+        /* For fork cards we want the parent name.
+           Batch requests in groups of 5 to avoid hitting the GitHub rate limit. */
         const forks = allRepos.filter(r => r.fork);
-        await Promise.all(forks.map(async (repo) => {
-          try {
-            const res = await fetch(`${API_BASE}/repos/${GITHUB_USER}/${repo.name}`, {
-              headers: { Accept: 'application/vnd.github+json' }
-            });
-            if (res.ok) {
-              const full = await res.json();
-              repo.parent = full.parent || null;
-            }
-          } catch (_) { /* non-critical */ }
-        }));
+        const BATCH = 5;
+        for (let i = 0; i < forks.length; i += BATCH) {
+          await Promise.all(forks.slice(i, i + BATCH).map(async (repo) => {
+            try {
+              const res = await fetch(`${API_BASE}/repos/${GITHUB_USER}/${repo.name}`, {
+                headers: { Accept: 'application/vnd.github+json' }
+              });
+              if (res.ok) {
+                const full = await res.json();
+                repo.parent = full.parent || null;
+              }
+            } catch (err) { console.warn(`Could not fetch parent info for ${repo.name}:`, err); }
+          }));
+        }
 
         grid.innerHTML = allRepos.map(renderCard).join('');
 
