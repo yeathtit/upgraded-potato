@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>yeathtit – GitHub Repositories &amp; Forks</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background: #0d1117;
+      color: #c9d1d9;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    header h1 {
+      font-size: 1.75rem;
+      color: #f0f6fc;
+    }
+
+    header p {
+      margin-top: 0.5rem;
+      color: #8b949e;
+      font-size: 0.95rem;
+    }
+
+    header a {
+      color: #58a6ff;
+      text-decoration: none;
+    }
+
+    header a:hover { text-decoration: underline; }
+
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      padding: 0.45rem 1.1rem;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      background: #161b22;
+      color: #c9d1d9;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .tab-btn:hover { background: #21262d; border-color: #58a6ff; }
+
+    .tab-btn.active {
+      background: #1f6feb;
+      border-color: #1f6feb;
+      color: #fff;
+    }
+
+    #search {
+      display: block;
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto 2rem;
+      padding: 0.55rem 0.85rem;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      color: #c9d1d9;
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    #search:focus { border-color: #58a6ff; }
+
+    #status {
+      text-align: center;
+      color: #8b949e;
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      transition: border-color 0.15s;
+    }
+
+    .card:hover { border-color: #58a6ff; }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-header a {
+      color: #58a6ff;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      word-break: break-word;
+    }
+
+    .card-header a:hover { text-decoration: underline; }
+
+    .badge {
+      font-size: 0.7rem;
+      padding: 0.1rem 0.45rem;
+      border-radius: 2em;
+      border: 1px solid;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .badge-fork   { color: #79c0ff; border-color: #1f6feb; background: #0d1f36; }
+    .badge-source { color: #56d364; border-color: #238636; background: #0d1f14; }
+    .badge-private { color: #f0883e; border-color: #bd561d; background: #3d1d01; }
+    .badge-archived { color: #8b949e; border-color: #30363d; background: #161b22; }
+
+    .card-desc {
+      color: #8b949e;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      flex: 1;
+    }
+
+    .card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      font-size: 0.8rem;
+      color: #8b949e;
+    }
+
+    .card-meta span { display: flex; align-items: center; gap: 0.25rem; }
+
+    .lang-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      background: #8b949e;
+    }
+
+    .fork-parent {
+      font-size: 0.78rem;
+      color: #8b949e;
+    }
+
+    .fork-parent a {
+      color: #58a6ff;
+      text-decoration: none;
+    }
+
+    .fork-parent a:hover { text-decoration: underline; }
+
+    #empty {
+      text-align: center;
+      color: #8b949e;
+      margin-top: 3rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>yeathtit – GitHub Repositories &amp; Forks</h1>
+    <p>
+      Data from the
+      <a href="https://api.github.com/users/yeathtit/repos" target="_blank" rel="noopener">
+        GitHub API
+      </a>
+      · View profile on
+      <a href="https://github.com/yeathtit" target="_blank" rel="noopener">
+        github.com/yeathtit
+      </a>
+    </p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-filter="all">All</button>
+    <button class="tab-btn" data-filter="forks">Forks</button>
+    <button class="tab-btn" data-filter="sources">Sources</button>
+  </div>
+
+  <input id="search" type="search" placeholder="Filter repositories…" aria-label="Filter repositories" />
+
+  <p id="status">Loading repositories…</p>
+
+  <div class="grid" id="grid"></div>
+  <p id="empty" hidden>No repositories match your filter.</p>
+
+  <script>
+    const GITHUB_USER = 'yeathtit';
+    const API_BASE    = 'https://api.github.com';
+
+    /* Language → colour map (subset of GitHub's palette) */
+    const LANG_COLORS = {
+      JavaScript: '#f1e05a', TypeScript: '#3178c6', Python: '#3572A5',
+      Java: '#b07219', 'C#': '#178600', 'C++': '#f34b7d', C: '#555555',
+      Go: '#00ADD8', Ruby: '#701516', PHP: '#4F5D95', Rust: '#dea584',
+      Swift: '#F05138', Kotlin: '#A97BFF', Shell: '#89e051',
+      HTML: '#e34c26', CSS: '#563d7c', Dockerfile: '#384d54',
+    };
+
+    let allRepos = [];
+    let activeFilter = 'all';
+
+    async function fetchAllPages(url) {
+      const results = [];
+      let next = url;
+      while (next) {
+        const res = await fetch(next, { headers: { Accept: 'application/vnd.github+json' } });
+        if (!res.ok) throw new Error(`GitHub API error ${res.status}`);
+        const data = await res.json();
+        results.push(...data);
+        const link = res.headers.get('Link') || '';
+        const match = link.match(/<([^>]+)>;\s*rel="next"/);
+        next = match ? match[1] : null;
+      }
+      return results;
+    }
+
+    function langDot(lang) {
+      const color = LANG_COLORS[lang] || '#8b949e';
+      return `<span class="lang-dot" style="background:${color}"></span>`;
+    }
+
+    function renderCard(repo) {
+      const isFork      = repo.fork;
+      const isArchived  = repo.archived;
+      const isPrivate   = repo.private;
+
+      const badges = [];
+      if (isFork)     badges.push(`<span class="badge badge-fork">fork</span>`);
+      else            badges.push(`<span class="badge badge-source">source</span>`);
+      if (isArchived) badges.push(`<span class="badge badge-archived">archived</span>`);
+      if (isPrivate)  badges.push(`<span class="badge badge-private">private</span>`);
+
+      const desc = repo.description
+        ? `<p class="card-desc">${escHtml(repo.description)}</p>`
+        : '';
+
+      const parent = isFork && repo.parent
+        ? `<p class="fork-parent">forked from <a href="${repo.parent.html_url}" target="_blank" rel="noopener">${escHtml(repo.parent.full_name)}</a></p>`
+        : '';
+
+      const stars = `<span title="Stars">⭐ ${repo.stargazers_count.toLocaleString()}</span>`;
+      const forks = `<span title="Forks">🍴 ${repo.forks_count.toLocaleString()}</span>`;
+      const issues = `<span title="Open issues">🐛 ${repo.open_issues_count.toLocaleString()}</span>`;
+      const lang = repo.language
+        ? `<span>${langDot(repo.language)} ${escHtml(repo.language)}</span>`
+        : '';
+      const updated = `<span title="Last updated">🕒 ${new Date(repo.updated_at).toLocaleDateString()}</span>`;
+
+      return `
+        <div class="card" data-fork="${isFork}" data-name="${escAttr(repo.name.toLowerCase())} ${escAttr((repo.description || '').toLowerCase())}">
+          <div class="card-header">
+            <a href="${repo.html_url}" target="_blank" rel="noopener">${escHtml(repo.name)}</a>
+            ${badges.join('')}
+          </div>
+          ${parent}
+          ${desc}
+          <div class="card-meta">${lang}${stars}${forks}${issues}${updated}</div>
+        </div>`;
+    }
+
+    function escHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function escAttr(str) {
+      return str.replace(/"/g, '&quot;');
+    }
+
+    function applyFilters() {
+      const query = document.getElementById('search').value.trim().toLowerCase();
+      const grid  = document.getElementById('grid');
+      const empty = document.getElementById('empty');
+
+      let visible = 0;
+      for (const card of grid.querySelectorAll('.card')) {
+        const isFork   = card.dataset.fork === 'true';
+        const name     = card.dataset.name;
+        const tabMatch =
+          activeFilter === 'all'    ? true :
+          activeFilter === 'forks'  ? isFork :
+          /* sources */               !isFork;
+        const textMatch = !query || name.includes(query);
+        const show = tabMatch && textMatch;
+        card.hidden = !show;
+        if (show) visible++;
+      }
+      empty.hidden = visible > 0;
+    }
+
+    async function init() {
+      const status = document.getElementById('status');
+      const grid   = document.getElementById('grid');
+      try {
+        /* Fetch repos — paginate to get them all */
+        const url = `${API_BASE}/users/${GITHUB_USER}/repos?per_page=100&sort=updated`;
+        allRepos = await fetchAllPages(url);
+
+        /* For fork cards we want the parent name; fetch parent info in parallel */
+        const forks = allRepos.filter(r => r.fork);
+        await Promise.all(forks.map(async (repo) => {
+          try {
+            const res = await fetch(`${API_BASE}/repos/${GITHUB_USER}/${repo.name}`, {
+              headers: { Accept: 'application/vnd.github+json' }
+            });
+            if (res.ok) {
+              const full = await res.json();
+              repo.parent = full.parent || null;
+            }
+          } catch (_) { /* non-critical */ }
+        }));
+
+        grid.innerHTML = allRepos.map(renderCard).join('');
+
+        const forkCount   = allRepos.filter(r => r.fork).length;
+        const sourceCount = allRepos.length - forkCount;
+        status.textContent = `${allRepos.length} repositories · ${forkCount} forks · ${sourceCount} sources`;
+        applyFilters();
+      } catch (err) {
+        status.textContent = `Failed to load repositories: ${err.message}`;
+        status.style.color = '#f85149';
+      }
+    }
+
+    /* Tab buttons */
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeFilter = btn.dataset.filter;
+        applyFilters();
+      });
+    });
+
+    /* Search */
+    document.getElementById('search').addEventListener('input', applyFilters);
+
+    init();
+  </script>
+</body>
+</html>
