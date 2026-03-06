@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Base Name Wallet</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0052ff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 1.25rem;
+      padding: 2.5rem 2rem;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 8px 40px rgba(0,0,0,.18);
+      text-align: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .6rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .logo svg { width: 36px; height: 36px; }
+
+    .logo-text {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #0052ff;
+      letter-spacing: -.5px;
+    }
+
+    h1 { font-size: 1.6rem; font-weight: 700; color: #1a1a2e; margin-bottom: .5rem; }
+    .subtitle { color: #6b7280; font-size: .95rem; margin-bottom: 2rem; line-height: 1.5; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      background: #0052ff;
+      color: #fff;
+      border: none;
+      border-radius: .75rem;
+      padding: .85rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s, transform .1s;
+      width: 100%;
+      justify-content: center;
+    }
+    .btn:hover { background: #0041cc; }
+    .btn:active { transform: scale(.98); }
+    .btn:disabled { background: #9ca3af; cursor: not-allowed; }
+
+    .wallet-info {
+      display: none;
+      margin-top: 1.5rem;
+      background: #f0f4ff;
+      border-radius: 1rem;
+      padding: 1.25rem;
+      text-align: left;
+    }
+
+    .wallet-info.visible { display: block; }
+
+    .info-row {
+      display: flex;
+      align-items: flex-start;
+      gap: .6rem;
+      margin-bottom: .85rem;
+    }
+    .info-row:last-child { margin-bottom: 0; }
+
+    .info-label {
+      font-size: .75rem;
+      font-weight: 600;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      min-width: 90px;
+      padding-top: .1rem;
+    }
+
+    .info-value {
+      font-size: .9rem;
+      color: #1a1a2e;
+      font-weight: 500;
+      word-break: break-all;
+      flex: 1;
+    }
+
+    .basename-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #0052ff;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #d1fae5;
+      color: #065f46;
+      border-radius: .4rem;
+      font-size: .75rem;
+      font-weight: 600;
+      padding: .15rem .55rem;
+    }
+
+    .badge.warning {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-msg {
+      font-size: .875rem;
+      color: #6b7280;
+      margin-top: 1rem;
+      min-height: 1.25rem;
+    }
+
+    .error-msg {
+      color: #dc2626;
+      font-size: .875rem;
+      margin-top: 1rem;
+      background: #fef2f2;
+      border-radius: .5rem;
+      padding: .75rem 1rem;
+      text-align: left;
+      display: none;
+    }
+    .error-msg.visible { display: block; }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #e5e7eb;
+      margin: 1.5rem 0;
+    }
+
+    .footer-note {
+      font-size: .8rem;
+      color: #9ca3af;
+      margin-top: 1.5rem;
+      line-height: 1.5;
+    }
+    .footer-note a { color: #0052ff; text-decoration: none; }
+    .footer-note a:hover { text-decoration: underline; }
+
+    .no-basename { color: #9ca3af; font-weight: 400; font-size: .9rem; }
+    .no-basename a { color: #0052ff; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">
+      <!-- Base network logo -->
+      <svg viewBox="0 0 111 111" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M54.921 110.034C85.359 110.034 110.034 85.359 110.034 54.921C110.034 24.4828 85.359 -0.192383 54.921 -0.192383C26.0432 -0.192383 2.35281 21.7137 0 50.0087H72.8467V59.8333H0.0974243C2.4978 88.0699 26.1693 110.034 54.921 110.034Z" fill="#0052FF"/>
+      </svg>
+      <span class="logo-text">Base Name Wallet</span>
+    </div>
+
+    <h1>Your Base Name</h1>
+    <p class="subtitle">
+      Connect your Ethereum wallet to see your
+      <a href="https://www.base.org/names" target="_blank" rel="noopener noreferrer">Basename</a>
+      registered on the Base network.
+    </p>
+
+    <button class="btn" id="connectBtn">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2z"/></svg>
+      Connect Wallet
+    </button>
+
+    <p class="status-msg" id="statusMsg" aria-live="polite"></p>
+    <div class="error-msg" id="errorMsg" role="alert"></div>
+
+    <div class="wallet-info" id="walletInfo" aria-label="Wallet information">
+      <div class="info-row">
+        <span class="info-label">Basename</span>
+        <span class="info-value basename-value" id="basenameValue">—</span>
+      </div>
+      <hr class="divider" />
+      <div class="info-row">
+        <span class="info-label">Address</span>
+        <span class="info-value" id="addressValue">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Network</span>
+        <span class="info-value" id="networkValue">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Balance</span>
+        <span class="info-value" id="balanceValue">—</span>
+      </div>
+    </div>
+
+    <p class="footer-note">
+      Basenames are human-readable names registered on the
+      <a href="https://www.base.org" target="_blank" rel="noopener noreferrer">Base</a>
+      L2 network. Get yours at
+      <a href="https://www.base.org/names" target="_blank" rel="noopener noreferrer">base.org/names</a>.
+    </p>
+  </div>
+
+  <!-- ethers.js v5 from CDN -->
+  <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js" crossorigin="anonymous"></script>
+  <script>
+    'use strict';
+
+    // ── Base network constants ────────────────────────────────────────────────
+    const BASE_CHAIN_ID = 8453;
+    const BASE_CHAIN_ID_HEX = '0x2105';
+    const BASE_RPC_URL = 'https://mainnet.base.org';
+    const L2_RESOLVER_ADDRESS = '0xC6d566A56A1aFf6508b41f6c90ff131615583BF9';
+
+    const L2_RESOLVER_ABI = [
+      {
+        inputs: [{ internalType: 'bytes32', name: 'node', type: 'bytes32' }],
+        name: 'name',
+        outputs: [{ internalType: 'string', name: '', type: 'string' }],
+        stateMutability: 'view',
+        type: 'function',
+      },
+    ];
+
+    // ── DOM refs ──────────────────────────────────────────────────────────────
+    const connectBtn  = document.getElementById('connectBtn');
+    const statusMsg   = document.getElementById('statusMsg');
+    const errorMsg    = document.getElementById('errorMsg');
+    const walletInfo  = document.getElementById('walletInfo');
+    const basenameEl  = document.getElementById('basenameValue');
+    const addressEl   = document.getElementById('addressValue');
+    const networkEl   = document.getElementById('networkValue');
+    const balanceEl   = document.getElementById('balanceValue');
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorMsg.classList.add('visible');
+      statusMsg.textContent = '';
+    }
+
+    function clearError() {
+      errorMsg.textContent = '';
+      errorMsg.classList.remove('visible');
+    }
+
+    function setStatus(msg) {
+      statusMsg.textContent = msg;
+    }
+
+    /**
+     * Compute the Base-specific reverse node for an address.
+     * Matches the logic in @coinbase/onchainkit:
+     *   addressNode = keccak256(utf8Bytes(address.toLowerCase().slice(2)))
+     *   baseReverseNode = namehash(`${(0x80000000 | chainId >>> 0).toString(16)}.reverse`)
+     *   reverseNode = keccak256(concat(baseReverseNode, addressNode))
+     */
+    function computeBaseReverseNode(address) {
+      const chainCoinType = (0x80000000 | BASE_CHAIN_ID) >>> 0; // 2147491901
+      const coinTypeHex = chainCoinType.toString(16);            // '80002105'
+      const baseReverseNode = ethers.utils.namehash(`${coinTypeHex}.reverse`);
+      const addressNode = ethers.utils.keccak256(
+        ethers.utils.toUtf8Bytes(address.toLowerCase().slice(2))
+      );
+      return ethers.utils.keccak256(
+        ethers.utils.concat([baseReverseNode, addressNode])
+      );
+    }
+
+    /** Resolve the Basename for the given address using the Base L2 resolver. */
+    async function resolveBasename(address) {
+      const provider = new ethers.providers.JsonRpcProvider(BASE_RPC_URL);
+      const resolver = new ethers.Contract(L2_RESOLVER_ADDRESS, L2_RESOLVER_ABI, provider);
+      const node = computeBaseReverseNode(address);
+      const name = await resolver.name(node);
+      return name || null;
+    }
+
+    /** Request the wallet to switch to (or add) the Base network. */
+    async function switchToBase() {
+      try {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: BASE_CHAIN_ID_HEX }],
+        });
+      } catch (switchError) {
+        // Error 4902: chain not added yet — add it
+        if (switchError.code === 4902) {
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: BASE_CHAIN_ID_HEX,
+              chainName: 'Base',
+              nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+              rpcUrls: [BASE_RPC_URL],
+              blockExplorerUrls: ['https://basescan.org'],
+            }],
+          });
+        } else {
+          throw switchError;
+        }
+      }
+    }
+
+    /** Main connect-and-resolve flow. */
+    async function connectWallet() {
+      clearError();
+      connectBtn.disabled = true;
+      setStatus('Connecting wallet…');
+
+      try {
+        if (!window.ethereum) {
+          throw new Error('No Ethereum wallet detected. Please install MetaMask or another Web3 wallet.');
+        }
+
+        // Request account access
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const address = accounts[0];
+
+        setStatus('Switching to Base network…');
+        await switchToBase();
+
+        // Build a provider scoped to the wallet
+        const provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
+        const network  = await provider.getNetwork();
+        const rawBalance = await provider.getBalance(address);
+        const balance  = ethers.utils.formatEther(rawBalance).slice(0, 10);
+
+        // Show address / network while resolving name
+        addressEl.textContent = address;
+        networkEl.innerHTML   = `Base Mainnet <span class="badge">Chain ID ${network.chainId}</span>`;
+        balanceEl.textContent = `${balance} ETH`;
+        walletInfo.classList.add('visible');
+
+        setStatus('Looking up your Basename…');
+        const basename = await resolveBasename(address);
+
+        if (basename) {
+          basenameEl.textContent = basename;
+        } else {
+          basenameEl.innerHTML = '<span class="no-basename">No Basename found — <a href="https://www.base.org/names" target="_blank" rel="noopener noreferrer">register one at base.org/names</a></span>';
+        }
+
+        setStatus('');
+        connectBtn.textContent = 'Refresh';
+        connectBtn.disabled = false;
+        connectBtn.innerHTML = `
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          Refresh
+        `;
+
+      } catch (err) {
+        const message = err?.message || 'An unexpected error occurred.';
+        showError(message);
+        setStatus('');
+        connectBtn.disabled = false;
+      }
+    }
+
+    connectBtn.addEventListener('click', connectWallet);
+
+    // Auto-reconnect if the user previously connected (accounts available)
+    if (window.ethereum) {
+      window.ethereum.request({ method: 'eth_accounts' })
+        .then(accounts => {
+          if (accounts && accounts.length > 0) {
+            connectWallet();
+          }
+        })
+        .catch(() => {});
+
+      // React to account / chain changes
+      window.ethereum.on('accountsChanged', () => connectWallet());
+      window.ethereum.on('chainChanged',    () => connectWallet());
+    }
+  </script>
+</body>
+</html>
